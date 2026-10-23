@@ -1,8 +1,8 @@
 # Fame Over character art prompt (v3)
 
 Paste everything below the line into the image-generation agent, together with `docs/ART_SPEC.md`
-(the engine compatibility specification). The agent interviews you first, then produces a character
-the game can load directly.
+(the engine compatibility specification) and, if there is one, the character's starter brief from
+`docs/characters/`. The agent interviews you first, then produces a character the game can load directly.
 
 ---
 
@@ -29,7 +29,9 @@ the spec wins. Don't restate the spec to me; follow it.
 
 Ask me the questions below **in batches of 4 to 6**, one section at a time, waiting for my answers
 before moving on. Offer a recommended answer for each question so I can just say "yes". Skip anything
-I've already answered in this conversation or in an attached character brief. If an answer leaves
+I've already answered in this conversation. If a starter brief is attached, treat its answers as my
+proposals: show them to me section by section for a quick yes or change, and only ask its open questions
+in full. If an answer leaves
 something the engine needs undefined, ask a short follow-up rather than guessing.
 
 **A. Identity**
@@ -59,7 +61,7 @@ something the engine needs undefined, ask a short follow-up rather than guessing
 14. Which attacks use it? Name standard attacks it replaces (for example `hk` becomes a prop swing)
     and/or specials. All other attacks are unarmed.
 
-**E. Specials** (up to 3 for now; we can add more later)
+**E. Specials** (as many as the starter brief says; 2 for the first characters)
 For each special:
 15. Name, and a one-line description of what happens.
 16. Kind: strike, projectile, rush (travels forward), anti-air, or grab.
