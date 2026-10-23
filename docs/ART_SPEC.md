@@ -1,4 +1,4 @@
-# Fame Over character art spec (v2)
+# Fame Over character art spec (v3)
 
 What the Fame Over engine needs from a character's art. Give this to whoever makes the art (a person, a 3D
 rig, an image-generation agent) as the **engine compatibility specification**. It covers functions and
@@ -6,15 +6,28 @@ technical delivery only. It is not a pose, motion or timing reference from any o
 describe how the character looks: pair it with that character's approved design reference and written
 character brief.
 
-v2 (2026-10-23): native 1080p and full colour, plus answers to the review of v1. Each character also gets
-its own brief (look, personality, signature prop and where it's stowed, which attacks use it, specials),
-written before any art is made.
+v3 (2026-10-23): one fixed size standard (section 1), timing budgets (section 5), FX lifetime (section 6).
+v2 moved to native 1080p and full colour. Each character also gets its own brief (look, personality,
+signature prop and where it's stowed, which attacks use it, specials), written before any art is made.
+
+**Which file decides what:** this spec decides sizes, canvas, pivot, names and formats.
+`animations.json` is authoritative for frame order, ticks, impact frames and FX spawns. `character.json`
+is authoritative for game data (prop use, specials, projectiles). The character brief decides the look.
 
 ## 1. Resolution and scale
 
-- The game renders natively at **1920x1080** and scales the whole picture to fit the window.
-- **Standing character height: about 500 px** (top of hair to soles), roughly 46% of the screen height.
-  The approved stance pilot is the size reference.
+- The game renders natively at **1920x1080** and scales the whole picture to fit the window. Final frames
+  are delivered at exactly the size the game draws them: **no upscaling by the engine, no low-res export.**
+- **Upright neutral standing height: 500 px** (top of hair to soles, in the idle stance), roughly 46% of
+  the screen height. A character brief may set 460-560 px for a shorter or taller character; that number
+  then applies to that character's whole set. Other poses (crouch, jump, kicks, lying) naturally differ.
+- **Earlier exports at other sizes (for example 112x152 frames with a ~140 px figure, made for the v1
+  480x270 spec) are not game assets.** Re-export them from their high-resolution source with the scale
+  below; never enlarge the small exports.
+- **How to get the scale:** measure the idle frame 1 figure in the production (source) art, from top of
+  hair to soles, in pixels: `scale = 500 / that height`. Apply that one number to every frame of every
+  animation, then place the result on the 768x768 canvas with the feet on the pivot. Record the source
+  height and scale in `README.md`.
 - **One shared scale for the whole character.** Production art may be made at a higher resolution, but the
   complete set is reduced to the final size with one scale factor. Never resize frames one by one to fit
   their bounding box: that makes the character change size between frames.
@@ -123,6 +136,26 @@ Single images, same colour and edge rules:
 - `impact` is the **zero-based** index into `frames` of the frame where the strike lands (2 = the third entry).
 - `loop` defaults to `false`. A non-looping animation **holds its last frame** until the engine moves on.
 - Every animation folder needs an entry. Frames may repeat inside an animation (e.g. `["02", 2]` twice).
+- **Ticks are a proposal; the engine's timing wins.** Fit each attack into the budget below so the
+  impact frame is on screen by the tick the hit starts. The programmer may retime ticks in the engine
+  without asking for new art; new art is only needed if a pose is missing.
+
+Timing budgets (60 ticks = 1 second). "Hit from" is the tick the attack becomes able to hit, so the impact
+frame must be showing by then; everything before it is wind-up, everything after is recovery.
+
+| id | total ticks | hit from tick | | id | total ticks | hit from tick |
+| --- | --- | --- | --- | --- | --- | --- |
+| lp | 12 | 3 | | ck | 16 | 4 |
+| hp | 16 | 4 | | sweep | 24 | 6 |
+| cp | 12 | 3 | | roundhouse | 27 | 9 |
+| lk | 17 | 5 | | uppercut | 26 | 6 |
+| hk | 22 | 7 | | jp, jk | held until landing | 4 |
+| throw, thrown | 30 | | | hitHigh, hitMid, hitCrouch | 16 | |
+| crouch | 5 | | | block, cblock | 5 | |
+| turn | 6 | | | getup | 20 | |
+
+Specials have no budget yet: propose one (wind-up, impact or release frame, recovery) in `animations.json`
+and the programmer confirms it.
 
 ## 6. Effects (FX)
 
@@ -134,6 +167,11 @@ Single images, same colour and edge rules:
 - An attack spawns an FX with `"fx": [{ "id", "frame", "x", "y" }]` in its animation entry: `frame` is the
   zero-based frame index it appears on, and `x, y` place the FX pivot relative to the body pivot (facing
   right, y negative upward). The engine mirrors it with the body.
+- **Lifetime:** a non-looping FX plays once and disappears after its last frame, unless its entry says
+  `"persist": true`. A looping FX (a projectile in flight) runs until the engine removes it (on hit, or
+  off-screen).
+- **Attachment:** by default an FX stays where it was spawned (sparks, dust, a flour burst). An FX that
+  must move with the body (a glowing hand) says `"follow": true`. Projectiles are moved by the engine.
 
 ## 7. Delivery and engine import
 
@@ -156,6 +194,8 @@ teams don't need to provide boxes.
 
 - Same face, hair, outfit, scarf, prop and lighting on every frame; no extra or missing fingers or limbs,
   no props appearing or vanishing unless the brief says so.
-- All frames 768x768 with the pivot in place; standing height about 500 px on every grounded frame.
+- All frames 768x768 with the pivot in place; upright neutral standing height (idle, walk, block,
+  getup end) is 500 px (or the brief's number) within +/-10 px; other poses naturally differ.
 - No coloured fringe on edges, no stray pixels, no leftover background.
-- Loops are seamless; `getup`, `intro` and hit reactions return cleanly to idle frame 1.
+- Loops are seamless; `getup`, `intro`, `hitHigh` and `hitMid` return cleanly to idle frame 1;
+  `hitCrouch` returns to the crouch hold.

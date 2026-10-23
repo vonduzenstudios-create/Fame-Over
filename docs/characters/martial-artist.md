@@ -12,7 +12,7 @@ change; lines marked **Open** need his answer.
    likeness of a real actor (only with a decision on permission).
 
 **B. Look**
-4. Stocky, powerful, about 50; standing height about 510 px.
+4. Stocky, powerful, about 50; upright standing height 510 px.
 5. Short reddish-brown hair, full trimmed beard, weathered tan skin, steady squint.
 6. Denim shirt with sleeves rolled to the elbow, open at the collar; dark blue jeans; brown leather belt
    with a plain buckle; brown cowboy-style boots. Shirt, jeans and boots identical on every frame.
@@ -30,7 +30,7 @@ change; lines marked **Open** need his answer.
 **E. Specials (2)**
 1. **Spirit Bolt** (projectile): a sharp two-handed push from the hip that fires a glowing bolt of
    energy straight ahead. Body 6-8 frames (gather, push, recover). FX `fx-bolt`: a travelling bolt
-   about 120x60 px, 4-frame loop, plus a 3-frame burst on hit. **Open:** bolt colour (default white-gold).
+   about 120x60 px, 4-frame loop, and a separate `fx-bolt-hit`: a 3-frame burst where it hits. **Open:** bolt colour (default white-gold).
 2. **Flying Kick** (rush): leaps forward feet-first across about half the screen, a straight flying side
    kick. Body 6-8 frames (crouch, launch, extended kick held in flight, landing). FX `fx-dust` on take-off.
 

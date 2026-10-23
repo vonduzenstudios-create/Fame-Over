@@ -5,7 +5,7 @@ A widescreen, 90s arcade-style fighting game with hand-made sprite animation. It
 stay there as the "retro" game.
 
 Stack: Vite + TypeScript + Canvas 2D. The game renders natively at 1920x1080 and scales the picture to
-fit the window. Fighters are detailed, full-colour sprites about 500 px tall.
+fit the window. Fighters are detailed, full-colour sprites 500 px tall (768x768 frames, see docs/ART_SPEC.md).
 
 ## Run it
 
@@ -48,7 +48,7 @@ Holding back also blocks. Lights chain into lights when they connect.
 
 ## Adding art
 
-New characters start with [docs/ART_PROMPT.md](docs/ART_PROMPT.md), the prompt for the art agents (it interviews you first). Art follows [docs/ART_SPEC.md](docs/ART_SPEC.md): one transparent 768x768 PNG per frame, feet at
+New characters start with [docs/HANDOFF.md](docs/HANDOFF.md) and [docs/ART_PROMPT.md](docs/ART_PROMPT.md), the prompt for the art agents (it interviews you first). Art follows [docs/ART_SPEC.md](docs/ART_SPEC.md): one transparent 768x768 PNG per frame, feet at
 (384, 736), facing right, in `frames/<animation id>/01.png`, ...
 
 ```

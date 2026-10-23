@@ -1,8 +1,8 @@
-# Fame Over character art prompt (v3)
+# Fame Over character art prompt (v4)
 
-Paste everything below the line into the image-generation agent, together with `docs/ART_SPEC.md`
-(the engine compatibility specification) and, if there is one, the character's starter brief from
-`docs/characters/`. The agent interviews you first, then produces a character the game can load directly.
+Paste everything below the line into the image-generation agent, and attach `ART_SPEC.md` (the engine
+compatibility specification), the starter brief(s) from `docs/characters/`, and any approved visual
+reference image. The agent interviews you first, then produces import-ready art for the game.
 
 ---
 
@@ -10,6 +10,13 @@ You are creating ORIGINAL fighting-game character art and animation for **Fame O
 2D fighting game with detailed, painted, photographic-looking sprites in the spirit of mid-90s
 digitized arcade fighters. Follow the staged workflow and its approval gates below. Use your
 image-generation, image-processing and filesystem tools to produce real deliverables.
+
+**Attached files.** ART_SPEC.md, one or more starter briefs (`chef.md`, `martial-artist.md`, ...), and
+possibly a visual reference image. If more than one brief is attached, first ask me which character to
+make. Work on **one character at a time**: never combine briefs, mix their traits, or start the second
+before the first is delivered. A visual reference image is for identity, proportions and rendering
+quality only (face, build, outfit, how detailed and photographic the painting is); never copy its pose
+or its pixel size, and never use it for another character.
 
 The attached **ART_SPEC.md is binding**: canvas, pivot, facing, scale, colour, edges, lighting,
 animation ids, timing format and FX rules all come from it. Where this prompt and the spec disagree,
@@ -42,8 +49,8 @@ something the engine needs undefined, ask a short follow-up rather than guessing
    original character with only broad, non-identifying traits.)
 
 **B. Look**
-4. Build, apparent age and height. Standing height on the canvas is about 500 px; give a range of
-   460-560 px for shorter or taller characters.
+4. Build, apparent age and height. Upright standing height on the canvas is 500 px; pick a number
+   from 460-560 px only for a shorter or taller character.
 5. Face, hair and any facial hair; skin tone.
 6. Outfit, top to bottom, with the main colours. What must stay identical on every frame?
 7. Accessories, and which ones may move (scarf ends, coat tails, hair).
@@ -65,7 +72,8 @@ something the engine needs undefined, ask a short follow-up rather than guessing
 For each special:
 15. Name, and a one-line description of what happens.
 16. Kind: strike, projectile, rush (travels forward), anti-air, or grab.
-17. Body animation beats: wind-up, release, recovery. Roughly how many frames?
+17. Body animation beats: wind-up, release, recovery. Roughly how many frames, and a proposed timing
+    (total ticks and the impact or release tick) for the programmer to confirm?
 18. Any effect that leaves the body (projectile, flame, splash): what it looks like, how big, and
     whether it travels. Effects are separate `fx-<name>` animations per the spec.
 
@@ -91,7 +99,9 @@ approve.**
 ## Stage 2: Idle pilot
 
 - Make the character design and the `idle` loop only, following the spec exactly (768x768, pivot
-  384,736, facing right, lighting, edges).
+  384,736, facing right, upright height 500 px or the brief's number, lighting, edges).
+- Report the measured figure height on the delivered 768x768 frames, the source height, and the scale
+  factor used. Those numbers are fixed for the rest of the set.
 - Show the looping GIF and a frame strip, and say plainly what's still imperfect.
 - **Stop until I approve the idle.** It becomes the identity reference for everything else.
 
@@ -112,7 +122,7 @@ approved versions, and ask again.
 
 ## Stage 5: Delivery
 
-Deliver exactly this, in the output folder and as a ZIP:
+Deliver import-ready art, exactly this, in the output folder and as a ZIP:
 
 ```
 <id>_v01/

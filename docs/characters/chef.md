@@ -1,8 +1,8 @@
 # Starter brief: the chef (pilot character 2)
 
 Proposed answers to the art prompt's interview. Everything here is a proposal for Matthew to confirm or
-change; lines marked **Open** need his answer. Abilities follow a classic street-cop toolkit (a baton
-pulled for a few moves, a lobbed explosive with a high and a low throw), redesigned as kitchen gear.
+change; lines marked **Open** need his answer. Gameplay needs from the specials: a high-arc projectile,
+a low projectile that travels along the floor, and a low strike with the prop. All are kitchen gear.
 
 **A. Identity**
 1. id `chef`; display name **Open**.
@@ -13,7 +13,7 @@ pulled for a few moves, a lobbed explosive with a high and a low throw), redesig
    of a real chef (only with a decision on permission).
 
 **B. Look**
-4. Lean and athletic, mid-50s; standing height about 500 px.
+4. Lean and athletic, mid-50s; upright standing height 500 px.
 5. Short spiky sandy-blond hair, deep forehead lines, strong jaw, clean-shaven, fair skin.
 6. White double-breasted chef's jacket with sleeves rolled to the forearm, red neckerchief, charcoal
    trousers, black work shoes. Jacket, neckerchief, trousers and shoes identical on every frame.
