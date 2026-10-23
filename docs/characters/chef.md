@@ -32,11 +32,12 @@ a low projectile that travels along the floor, and a low strike with the prop. A
     Everything else is unarmed.
 
 **E. Specials (2)**
-1. **Kitchen Grenade** (projectile, two versions): lobs a smoking cast-iron pan with a lid that bursts
-   in a puff of flour and steam where it lands. High lob (`sp-lob-high`) arcs far, low toss
-   (`sp-lob-low`) rolls along the floor. Body 6-7 frames each (reach back, throw, follow-through).
-   FX `fx-pan` (spinning pan in flight, 4-frame loop, about 90x90 px) and `fx-flour` (burst, 5 frames,
-   about 200x200 px).
+1. **Onion Bomb** (projectile, two versions): pulls a whole raw onion from his apron pocket and throws
+   it like a grenade. It bursts on contact in a stinging cloud of onion fumes and flying layers. High lob
+   (`sp-lob-high`) arcs far, low toss (`sp-lob-low`) bowls it rolling along the floor. Body 6-7 frames each
+   (reach to pocket, wind up, throw, follow-through). FX `fx-onion` (onion spinning or rolling, 4-frame
+   loop, about 70x70 px) and `fx-onion-burst` (fume cloud with onion layers, 5 frames, about 200x200 px).
+   The onion only appears in the hand from the reach frame onward; the pocket looks the same on every frame.
 2. **Rolling Pin Trip** (low strike): pulls the rolling pin and sweeps it low in front, tripping the
    opponent. Body 7-8 frames (draw pin, low swing, re-stow). No FX.
 
