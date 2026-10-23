@@ -81,6 +81,19 @@ attacks the character brief names, the way a baton fighter pulls it for a few mo
 time it stays stowed in one fixed place on the body (belt, holster or back), the same on every frame.
 The character brief says where it's stowed and which attacks use it.
 
+**Pose boards.** `docs/poses/<id>.png` shows what each animation must do for the engine: key poses as a
+plain stick figure on the real canvas (pivot, 500 px line, lead limbs orange, rear blue). Match the
+function (where the body is, what reaches where, how it starts and ends), not the stick figure's look.
+
+**The throw (universal, so any thrower works with any victim).** `throw` is 5 frames on the thrower:
+reach, grab, lift, overhead, toss behind. The victim is carried **over the thrower and lands behind
+them, so the two swap sides.** The character's flavour (a headbutt, a collar grab) goes in the thrower's
+upper body during reach and grab, but the path is always the same. `thrown` is exactly 4 frames, played
+in step with throw frames 2-5: grabbed, lifted, overhead face down, head down falling. Draw `thrown`
+with the hips 250 px above the pivot on every frame (the body rotates around the hips); the engine moves
+it along the path on the `throw` board. After the last thrown frame the engine turns the victim around
+and plays `lie`, then `getup`.
+
 | id | What | Frames | Notes |
 | --- | --- | --- | --- |
 | idle | fighting stance, fists up | 8-10 | seamless loop |
@@ -100,8 +113,8 @@ The character brief says where it's stowed and which attacks use it.
 | ck | crouching kick | 4-5 | low |
 | sweep | crouching leg sweep | 6-8 | knocks down |
 | jk | air kick | 2-3 | |
-| throw | grab and throw | 5-7 | |
-| thrown | being thrown | 5-6 | |
+| throw | grab and throw over the top | 5 | victim lands behind; see The throw |
+| thrown | being thrown | 4 | hips fixed 250 px above pivot |
 | block | standing guard | 2-3 | last frame held |
 | cblock | crouching guard | 2-3 | last frame held |
 | hitHigh | hit in the face | 3 | returns toward idle frame 1 |

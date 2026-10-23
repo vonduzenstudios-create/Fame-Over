@@ -16,7 +16,8 @@ re-export it: `scale = 500 / (source idle height in px)`, one factor for every f
 2. `ART_SPEC.md`
 3. The brief for the character you're making now: `characters/chef.md` or `characters/martial-artist.md`
    (attaching both is fine; the agent asks which one first and makes only that one)
-4. For the chef only: the approved chef pilot image, as the identity and rendering-quality reference
+4. The `poses/` folder (one board per animation: what each animation must do for the engine)
+5. For the chef only: the approved chef pilot image, as the identity and rendering-quality reference
 
 ## Opening message
 
