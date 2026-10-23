@@ -48,7 +48,7 @@ Holding back also blocks. Lights chain into lights when they connect.
 
 ## Adding art
 
-Art follows [docs/ART_SPEC.md](docs/ART_SPEC.md): one transparent 768x768 PNG per frame, feet at
+New characters start with [docs/ART_PROMPT.md](docs/ART_PROMPT.md), the prompt for the art agents (it interviews you first). Art follows [docs/ART_SPEC.md](docs/ART_SPEC.md): one transparent 768x768 PNG per frame, feet at
 (384, 736), facing right, in `frames/<animation id>/01.png`, ...
 
 ```
