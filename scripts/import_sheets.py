@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Turn a folder of fighter frames into one packed sprite sheet the game loads.
 
-Input: an art folder laid out as frames/<section>/<name>.png (e.g. frames/punch/02.png), one
-transparent PNG per frame, the fighter facing right. Output: sheet.png + sheet.json in --out,
-with every frame keyed "<section>/<name>" (the names the fighter's tags use, see
-src/fighters/<id>/fighter.ts).
+Input: an art folder laid out as frames/<animation>/<nn>.png (e.g. frames/lp/02.png), one
+transparent PNG per frame, the fighter facing right (docs/ART_SPEC.md). Output: sheet pages
+(sheet-0.png, sheet-1.png, ... up to 4096x4096 each) + sheet.json in --out, with every frame keyed
+"<animation>/<nn>" (the names the fighter's tags use, see src/fighters/<id>/fighter.ts).
 
 For each frame the script works out a starting point you then check in the sprite viewer
 (open the game with ?viewer):
-  - the feet anchor: the fixed pivot (96,184 on the standard 192x192 canvas, see docs/ART_SPEC.md),
+  - the feet anchor: the fixed pivot (384,736 on the standard 768x768 canvas, see docs/ART_SPEC.md),
     or for other canvases the bottom of the figure, centred on the pixels of the lowest rows;
   - hurtboxes: head, body and legs bands of the figure (one box for a figure lying down);
   - a hitbox wherever a limb reaches well in front of the body (only used on a move's active frames).
@@ -27,8 +27,10 @@ import sys
 
 from PIL import Image
 
-PAD = 1
-MAX_W = 2048
+PAD = 2
+PAGE = 4096
+# Sizes for ~500 px tall fighters: body width, how far in front counts as reaching, hitbox depth.
+TORSO, REACH, TIP = 160, 120, 64
 
 
 def opaque_rows(im, x0, x1, y0, y1):
@@ -57,7 +59,7 @@ def analyse(im, pivot=None):
     w, h = x1 - x0, y1 - y0
     rows = opaque_rows(im, x0, x1, y0, y1)
     # feet anchor: centre of what's in the lowest 6 rows
-    feet = [rows[y] for y in range(max(y0, y1 - 6), y1) if rows.get(y)]
+    feet = [rows[y] for y in range(max(y0, y1 - 24), y1) if rows.get(y)]
     ax = round((min(s[0] for s in feet) + max(s[1] for s in feet)) / 2)
     ay = y1
     if pivot:
@@ -70,15 +72,15 @@ def analyse(im, pivot=None):
         hurt = [b for b in (band_box(rows, y0, head_end, ax, ay), band_box(rows, head_end, body_end, ax, ay), band_box(rows, body_end, y1, ax, ay)) if b]
         # keep boxes to about torso width around the feet; reaching limbs are the hitbox's job
         for b in hurt:
-            if b[2] > 40:
-                b[0], b[2] = -20, 40
-    # hitbox: the front-most 16 px of anything reaching more than 30 px in front of the feet
+            if b[2] > TORSO:
+                b[0], b[2] = -TORSO // 2, TORSO
+    # hitbox: the front-most part of anything reaching well in front of the feet
     hit = None
-    reach = [(y, s[1]) for y, s in rows.items() if s and s[1] - ax > 30]
+    reach = [(y, s[1]) for y, s in rows.items() if s and s[1] - ax > REACH]
     if reach:
         far = max(r[1] for r in reach)
-        ys = [y for y, x in reach if x >= far - 16]
-        hit = [far - 16 - ax, min(ys) - ay, 17, max(ys) - min(ys) + 1]
+        ys = [y for y, x in reach if x >= far - TIP]
+        hit = [far - TIP - ax, min(ys) - ay, TIP + 1, max(ys) - min(ys) + 1]
     return {'crop': bbox, 'ax': ax - x0, 'ay': ay - y0, 'hurt': hurt, 'hit': hit}
 
 
@@ -87,7 +89,7 @@ def main():
     ap.add_argument('art', help='art folder containing frames/<section>/<name>.png')
     ap.add_argument('--out', required=True, help='where to write sheet.png and sheet.json')
     ap.add_argument('--scale', type=float, default=1.0, help='resize frames first (nearest neighbour)')
-    ap.add_argument('--pivot', default=None, help='feet anchor "x,y" on every frame (default: 96,184 for 192x192 frames, else guessed)')
+    ap.add_argument('--pivot', default=None, help='feet anchor "x,y" on every frame (default: 384,736 for 768x768 frames, else guessed)')
     a = ap.parse_args()
 
     art = pathlib.Path(a.art)
@@ -104,30 +106,40 @@ def main():
         im = Image.open(f).convert('RGBA')
         if a.scale != 1:
             im = im.resize((round(im.width * a.scale), round(im.height * a.scale)), Image.NEAREST)
-        pivot = tuple(int(v) for v in a.pivot.split(',')) if a.pivot else (96, 184) if im.size == (192, 192) else None
+        pivot = tuple(int(v) for v in a.pivot.split(',')) if a.pivot else (384, 736) if im.size == (768, 768) else None
         info = analyse(im, pivot)
         if not info:
             print(f'skipping empty frame {name}')
             continue
         items.append((name, im.crop(info['crop']), info))
 
-    # shelf packing, tallest first
+    # shelf packing into 4096x4096 pages, tallest first
     order = sorted(items, key=lambda it: -it[1].height)
+    pages = [[]]  # per page: (name, x, y)
     x = y = shelf = 0
     placed = {}
     for name, im, info in order:
-        if x + im.width + PAD > MAX_W:
+        if x + im.width > PAGE:
             x, y, shelf = 0, y + shelf + PAD, 0
-        placed[name] = (x, y)
+        if y + im.height > PAGE:
+            pages.append([])
+            x = y = shelf = 0
+        placed[name] = (len(pages) - 1, x, y)
         x += im.width + PAD
         shelf = max(shelf, im.height)
-    sheet = Image.new('RGBA', (min(MAX_W, max(px + im.width for (px, _), (_, im, _) in zip(placed.values(), order)) if order else 1), y + shelf))
+    by_name = {name: (im, info) for name, im, info in items}
+    sheets = []
+    for p in range(len(pages)):
+        names = [n for n, v in placed.items() if v[0] == p]
+        w = max(placed[n][1] + by_name[n][0].width for n in names)
+        h = max(placed[n][2] + by_name[n][0].height for n in names)
+        sheets.append(Image.new('RGBA', (w, h)))
 
     frames = {}
     for name, im, info in items:
-        px, py = placed[name]
-        sheet.paste(im, (px, py))
-        fr = {'x': px, 'y': py, 'w': im.width, 'h': im.height, 'ax': info['ax'], 'ay': info['ay'],
+        page, px, py = placed[name]
+        sheets[page].paste(im, (px, py))
+        fr = {'page': page, 'x': px, 'y': py, 'w': im.width, 'h': im.height, 'ax': info['ax'], 'ay': info['ay'],
               'hurt': [dict(zip('xywh', b)) for b in info['hurt']]}
         if info['hit']:
             fr['hit'] = dict(zip('xywh', info['hit']))
@@ -146,9 +158,12 @@ def main():
 
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
-    sheet.save(out / 'sheet.png', optimize=True)
-    (out / 'sheet.json').write_text(json.dumps({'image': 'sheet.png', 'frames': frames}, indent=1, sort_keys=True))
-    print(f'{len(frames)} frames -> {out / "sheet.png"} ({sheet.width}x{sheet.height}) and sheet.json')
+    images = []
+    for i, sh in enumerate(sheets):
+        sh.save(out / f'sheet-{i}.png', optimize=True)
+        images.append(f'sheet-{i}.png')
+    (out / 'sheet.json').write_text(json.dumps({'images': images, 'frames': frames}, indent=1, sort_keys=True))
+    print(f'{len(frames)} frames -> {len(images)} page(s) in {out} and sheet.json')
 
 
 if __name__ == '__main__':

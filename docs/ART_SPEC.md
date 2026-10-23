@@ -1,51 +1,69 @@
-# Fame Over character art spec
+# Fame Over character art spec (v2)
 
-What the game engine needs from a character's art. Hand this to whatever makes the art (a person, a 3D rig,
-an image tool) as the engine compatibility specification. It lists functions and technical limits only; it
-is not a pose or timing reference from any other game.
+What the Fame Over engine needs from a character's art. Give this to whoever makes the art (a person, a 3D
+rig, an image-generation agent) as the **engine compatibility specification**. It covers functions and
+technical delivery only. It is not a pose, motion or timing reference from any other game, and it does not
+describe how the character looks: pair it with that character's approved design reference and written
+character brief.
 
-## Canvas and scale
+v2 (2026-10-23): native 1080p and full colour, plus answers to the review of v1.
 
-- Game screen: 480x270 pixels, scaled up by whole numbers (x4 = 1920x1080). Draw at final size, never
-  upscaled or downscaled per frame.
-- Standing character height: about 130 px (top of head to soles).
-- **Every frame uses the same canvas: 192x192 px, transparent.**
-- **Pivot (feet anchor): x=96, y=184.** The point between the feet sits there on every frame where the
-  character stands, crouches or attacks on the ground. Lying, falling and airborne frames keep the same
-  pivot as "where the feet would touch the floor".
-- Character faces **right** on every frame. The game mirrors it for the other side, so avoid lettering or
-  one-sided logos that would read backwards.
-- Animate **in place**. The game moves the character itself: walks don't travel across the canvas, jumps
-  and flips stay low on the canvas (the game adds the height). Knockdowns may slide a little, but end with
-  the body over the pivot.
-- No baked shadow, floor, motion blur or background. The game draws the shadow.
+## 1. Resolution and scale
 
-## Pixels and colour
+- The game renders natively at **1920x1080** and scales the whole picture to fit the window.
+- **Standing character height: about 500 px** (top of hair to soles), roughly 46% of the screen height.
+  The approved stance pilot is the size reference.
+- **One shared scale for the whole character.** Production art may be made at a higher resolution, but the
+  complete set is reduced to the final size with one scale factor. Never resize frames one by one to fit
+  their bounding box: that makes the character change size between frames.
+- Enlarged previews (GIFs, galleries) may use any scaling; they are not game assets.
 
-- Hard alpha only: every pixel fully opaque or fully transparent. No soft edges or semi-transparent fringe.
-- Limited palette, about 48 colours or fewer, and the same palette on every frame.
-- Keep each costume area on its own small colour ramp (for example jacket: 5 whites/greys, trousers: 4
-  darks, skin: 5, hair: 4). The game recolours those ramps for the second player in a mirror match.
-- One consistent light direction across the whole set.
+## 2. Canvas, pivot and facing
 
-## Animations
+- **Every frame: 768x768 px, transparent PNG (RGBA, 8 bits per channel).**
+- **Pivot: x=384, y=736.** The pivot is a fixed character/world origin, *not* the lowest visible pixel.
+  On the ground, the point midway between the feet sits on it. In the air or while falling, the pivot
+  stays where the feet would touch the floor, and the body is placed relative to it as authored.
+- **Never bottom-align or re-centre airborne, falling or lying poses.** Keep authored offsets. If a pose
+  would leave the 768x768 canvas, flag that frame instead of shrinking or shifting it.
+- **Facing:** every action is performed toward screen right (the opponent's side). Spins, flips and hit
+  reactions may show the back or side. The engine mirrors the whole frame for a character on the right,
+  so avoid lettering or one-sided logos that read backwards.
+- **`turn`:** plays when the opponent crosses over. The engine flips the mirror on the turn's first frame,
+  so draw it as: starts facing away (toward screen left) and ends in the idle stance facing right.
+- **Animate in place.** The engine moves the character: walks don't travel, jumps and flips stay near the
+  pivot (the engine adds height), and knockdowns may slide a little but end over the pivot.
+- No baked shadow, floor, background, motion blur or camera shake. The engine draws the shadow.
+
+## 3. Colour and edges
+
+- **Full colour, no palette limit.** Keep the photographic shading of the approved pilot.
+- One consistent light direction for the whole character (choose one and record it in the brief).
+- Edges may be soft (anti-aliased alpha). **No coloured halo or fringe:** the edge pixels must carry the
+  character's own colours, not the generator's background (check dark trousers and shoes especially).
+- Colour should not drift between frames or animations (skin, jacket white, scarf red, wood of props).
+- **Player 2 colours:** the engine does not swap palettes. For mirror matches it applies its own tint to
+  the finished frames, so no extra art is needed. (If we later want a true alternate outfit, it will be a
+  separate full set in an `alt/` folder; not part of this delivery.)
+
+## 4. Animations
 
 One folder per animation, named with the engine's id: `frames/<id>/01.png`, `02.png`, ... in play order.
-Frame counts are guides; fewer good frames beat many inconsistent ones. Attack frame counts are art only:
-the game sets when a hit lands, so mark the impact frame instead (see animations.json below).
+Frame counts are guides for 60 fps play; fewer clean, consistent frames beat many inconsistent ones.
+The engine decides when an attack can hit, so attack frame counts are art only: mark the impact frame.
 
 | id | What | Frames | Notes |
 | --- | --- | --- | --- |
-| idle | fighting stance | 6-10 | seamless loop |
-| turn | turning to face the other way | 2 | ends in stance |
+| idle | fighting stance | 8-10 | seamless loop (the approved pilot) |
+| turn | turning to face the other way | 2-3 | see Facing |
 | walk | walking forward | 8-10 | seamless loop; walking back plays it reversed |
 | crouch | ducking down | 3 | last frame is the crouch hold |
 | jump | straight jump | 3 | take-off, rising, falling |
-| flip | forward/back jump somersault | 6-8 | |
+| flip | forward/back somersault | 6-8 | |
 | lp | light punch to the stomach | 4-5 | |
 | hp | fast punch to the face | 4-5 | |
-| cp | crouching punch | 3-4 | from the crouch hold |
-| uppercut | crouch to rising uppercut | 5-6 | launches the opponent |
+| cp | crouching punch | 3-4 | starts from the crouch hold |
+| uppercut | rising uppercut from a crouch | 5-6 | launches the opponent |
 | jp | air punch | 2-3 | from the jump pose |
 | lk | mid kick | 4-5 | |
 | hk | high kick | 4-5 | |
@@ -57,45 +75,71 @@ the game sets when a hit lands, so mark the impact frame instead (see animations
 | thrown | being thrown | 5-6 | |
 | block | standing guard | 2-3 | last frame held |
 | cblock | crouching guard | 2-3 | last frame held |
-| hitHigh | hit in the face | 3 | returns to stance |
-| hitMid | hit in the stomach | 3 | returns to stance |
-| hitCrouch | hit while crouched | 3 | returns to crouch |
+| hitHigh | hit in the face | 3 | returns toward idle frame 1 |
+| hitMid | hit in the stomach | 3 | returns toward idle frame 1 |
+| hitCrouch | hit while crouched | 3 | returns to the crouch hold |
 | launched | knocked into the air | 4 | last frame held while flying |
 | knockdown | swept or knocked off the feet | 4 | |
 | lie | landing flat on the back | 3-4 | last frame held |
 | getup | getting up | 4-5 | last frame matches idle frame 1 |
-| ko | collapsing, knocked out | 6-8 | |
+| ko | collapsing, knocked out | 6-8 | last frame held |
 | dizzy | stunned and swaying | 6-8 | seamless loop |
-| victory | round win | 8-12 | |
-| intro | entrance before round 1 | 6-12 | ends in idle |
+| victory | round win | 8-12 | last frame held |
+| intro | entrance before round 1 | 6-12 | ends in idle frame 1 |
 
-Also, as single images:
-- `portrait.png` 64x64, head and shoulders facing right (select screen, health bar).
-- `select.png` up to 192x192, the character-select pose (can reuse an idle frame at first).
+Single images, same colour and edge rules:
+- `portrait.png`: 256x256, head and shoulders facing right (select screen, health bar).
+- `select.png`: 768x768 on the standard canvas and pivot, the character-select pose (an idle frame is fine at first).
 
-Effects that leave the body (blowtorch flame, a thrown pan, sparks) go in their own folder,
-`frames/fx-<name>/`, on their own canvas, not painted into the body frames.
+## 5. animations.json
 
-## Files
+```json
+{
+  "idle":  { "frames": [["01", 6], ["02", 6], ["03", 6]], "loop": true },
+  "lp":    { "frames": [["01", 2], ["02", 2], ["03", 4], ["04", 3]], "impact": 2 },
+  "hk":    { "frames": [["01", 3], ["02", 3], ["03", 5], ["04", 4]], "impact": 2,
+             "fx": [{ "id": "fx-swoosh", "frame": 1, "x": 180, "y": -420 }] }
+}
+```
+
+- Frame entries are `[file name without .png, ticks]`. **Ticks are integer game frames at 60 per second,
+  minimum 1.** (A 120 ms preview frame is about 7 ticks.)
+- `impact` is the **zero-based** index into `frames` of the frame where the strike lands (2 = the third entry).
+- `loop` defaults to `false`. A non-looping animation **holds its last frame** until the engine moves on.
+- Every animation folder needs an entry. Frames may repeat inside an animation (e.g. `["02", 2]` twice).
+
+## 6. Effects (FX)
+
+- Anything that leaves the body or glows (blowtorch flame, sparks, a thrown pan, steam) is its own
+  animation in `frames/fx-<name>/`, never painted into body frames.
+- FX frames use a 384x384 canvas with their own pivot at the centre (192, 192), unless an FX's
+  `animations.json` entry gives `"pivot": [x, y]`.
+- Same colour and edge rules as the body. Additive glow is allowed only if marked `"blend": "add"`.
+- An attack spawns an FX with `"fx": [{ "id", "frame", "x", "y" }]` in its animation entry: `frame` is the
+  zero-based frame index it appears on, and `x, y` place the FX pivot relative to the body pivot (facing
+  right, y negative upward). The engine mirrors it with the body.
+
+## 7. Delivery and engine import
 
 ```
 <Character>/
   frames/<id>/01.png ...
+  frames/fx-<name>/01.png ...
   portrait.png
   select.png
   animations.json
-  palette.png        (one pixel per colour, optional but helps the P2 recolour)
+  README.md, provenance.json, production/ ...   (the art team's records)
 ```
 
-`animations.json` gives each animation's order, how long each frame shows (in game frames, 60 a second),
-and for attacks which frame index is the impact:
+The engine imports with `scripts/import_sheets.py` from the Fame-Over repo. It crops each frame, packs them
+into sheet pages (4096x4096 max) and writes `sheet.json` (frame rectangles, pivot, hurtboxes, hitboxes). It
+suggests hit and hurt boxes from the pixels; the developer checks them in the in-game sprite viewer. Art
+teams don't need to provide boxes.
 
-```json
-{
-  "idle": { "frames": [["01", 6], ["02", 6], ["03", 6]], "loop": true },
-  "lp":   { "frames": [["01", 2], ["02", 2], ["03", 4], ["04", 3]], "impact": 2 }
-}
-```
+## 8. Quality checks before delivery
 
-The game turns the frames into one packed sheet with `scripts/import_sheets.py`, which also suggests hit and
-hurt boxes; those are then checked and adjusted in the sprite viewer (`?viewer`).
+- Same face, hair, outfit, scarf, prop and lighting on every frame; no extra or missing fingers or limbs,
+  no props appearing or vanishing unless the brief says so.
+- All frames 768x768 with the pivot in place; standing height about 500 px on every grounded frame.
+- No coloured fringe on edges, no stray pixels, no leftover background.
+- Loops are seamless; `getup`, `intro` and hit reactions return cleanly to idle frame 1.

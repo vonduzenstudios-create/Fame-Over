@@ -10,7 +10,7 @@ export type State = 'idle' | 'walk' | 'crouch' | 'jump' | 'attack' | 'block' | '
 const BTNS: Btn[] = ['lp', 'hp', 'lk', 'hk'];
 /** A press stays usable this many frames, so attacks typed a little early still come out. */
 const BUFFER = 6;
-const JUMP_V = 11;
+const JUMP_V = 44;
 
 export class Fighter {
   x: number;

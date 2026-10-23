@@ -10,18 +10,18 @@ import type { Move } from './types';
 const box = (x: number, y: number, w: number, h: number) => ({ x, y, w, h });
 
 export const STANDARD_MOVES: Record<string, Move> = {
-  lp: { id: 'lp', tag: 'lp', active: [3, 7], dmg: 40, level: 'mid', effect: 'light', stun: 14, push: 3, box: box(16, -96, 36, 14) },
-  hp: { id: 'hp', tag: 'hp', active: [4, 9], dmg: 60, level: 'high', effect: 'light', stun: 16, push: 3.5, box: box(16, -116, 40, 14) },
-  lk: { id: 'lk', tag: 'lk', active: [5, 10], dmg: 50, level: 'mid', effect: 'light', stun: 15, push: 3.5, box: box(14, -82, 50, 16) },
-  hk: { id: 'hk', tag: 'hk', active: [7, 13], dmg: 80, level: 'high', effect: 'heavy', stun: 20, push: 5, box: box(14, -120, 54, 18) },
-  cp: { id: 'cp', tag: 'cp', active: [3, 7], dmg: 35, level: 'mid', effect: 'light', stun: 13, push: 2.5, box: box(16, -70, 36, 14), crouch: true },
-  ck: { id: 'ck', tag: 'ck', active: [4, 9], dmg: 40, level: 'low', effect: 'light', stun: 14, push: 3, box: box(14, -18, 54, 16), crouch: true },
+  lp: { id: 'lp', tag: 'lp', active: [3, 7], dmg: 40, level: 'mid', effect: 'light', stun: 14, push: 12, box: box(64, -384, 144, 56) },
+  hp: { id: 'hp', tag: 'hp', active: [4, 9], dmg: 60, level: 'high', effect: 'light', stun: 16, push: 14, box: box(64, -464, 160, 56) },
+  lk: { id: 'lk', tag: 'lk', active: [5, 10], dmg: 50, level: 'mid', effect: 'light', stun: 15, push: 14, box: box(56, -328, 200, 64) },
+  hk: { id: 'hk', tag: 'hk', active: [7, 13], dmg: 80, level: 'high', effect: 'heavy', stun: 20, push: 20, box: box(56, -480, 216, 72) },
+  cp: { id: 'cp', tag: 'cp', active: [3, 7], dmg: 35, level: 'mid', effect: 'light', stun: 13, push: 10, box: box(64, -280, 144, 56), crouch: true },
+  ck: { id: 'ck', tag: 'ck', active: [4, 9], dmg: 40, level: 'low', effect: 'light', stun: 14, push: 12, box: box(56, -72, 216, 64), crouch: true },
   uppercut: {
     id: 'uppercut', tag: 'uppercut', active: [6, 12], dmg: 130, level: 'high', effect: 'launch', stun: 0, push: 0,
-    box: box(6, -150, 34, 60), crouch: true, lift: [11, 2.5],
+    box: box(24, -600, 136, 240), crouch: true, lift: [44, 10],
   },
-  roundhouse: { id: 'roundhouse', tag: 'roundhouse', active: [9, 15], dmg: 110, level: 'high', effect: 'knockdown', stun: 0, push: 6, box: box(10, -124, 60, 22) },
-  sweep: { id: 'sweep', tag: 'sweep', active: [6, 13], dmg: 70, level: 'low', effect: 'knockdown', stun: 0, push: 3, box: box(10, -20, 64, 18) },
-  jp: { id: 'jp', tag: 'jp', active: [4, 20], dmg: 60, level: 'high', effect: 'heavy', stun: 18, push: 3, box: box(14, -86, 38, 16), air: true },
-  jk: { id: 'jk', tag: 'jk', active: [4, 22], dmg: 70, level: 'high', effect: 'heavy', stun: 18, push: 4, box: box(10, -56, 50, 20), air: true },
+  roundhouse: { id: 'roundhouse', tag: 'roundhouse', active: [9, 15], dmg: 110, level: 'high', effect: 'knockdown', stun: 0, push: 24, box: box(40, -496, 240, 88) },
+  sweep: { id: 'sweep', tag: 'sweep', active: [6, 13], dmg: 70, level: 'low', effect: 'knockdown', stun: 0, push: 12, box: box(40, -80, 256, 72) },
+  jp: { id: 'jp', tag: 'jp', active: [4, 20], dmg: 60, level: 'high', effect: 'heavy', stun: 18, push: 12, box: box(56, -344, 152, 64), air: true },
+  jk: { id: 'jk', tag: 'jk', active: [4, 22], dmg: 70, level: 'high', effect: 'heavy', stun: 18, push: 16, box: box(40, -224, 200, 80), air: true },
 };

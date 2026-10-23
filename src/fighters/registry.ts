@@ -15,7 +15,8 @@ export async function sheetFor(def: FighterDef): Promise<Sheet> {
   let s = sheets.get(def.id);
   if (!s) {
     const placeholder = placeholderSheet(def.tags);
-    const art = def.sheetUrl ? await loadSheet(def.sheetUrl) : null;
+    // public/local-art/<id>/ (git-ignored) wins, for trying art on your own machine before committing it
+    const art = (await loadSheet(`local-art/${def.id}/sheet.json`)) ?? (def.sheetUrl ? await loadSheet(def.sheetUrl) : null);
     s = art ? { ...art, fallback: placeholder } : placeholder;
     sheets.set(def.id, s);
   }

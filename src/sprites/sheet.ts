@@ -11,7 +11,9 @@ export interface Box {
 }
 
 export interface Frame {
-  /** Where the frame sits in the sheet image. */
+  /** Which sheet image (page) holds the frame; 0 when there is one. */
+  page?: number;
+  /** Where the frame sits in that image. */
   x: number;
   y: number;
   w: number;
@@ -25,9 +27,9 @@ export interface Frame {
   hit?: Box;
 }
 
-/** What a sheet's .json file holds: frames keyed by name, e.g. "punch/02". */
+/** What a sheet's .json file holds: frames keyed by name, e.g. "lp/02", and the page images they sit on. */
 export interface SheetData {
-  image: string;
+  images: string[];
   frames: Record<string, Frame>;
 }
 
@@ -42,8 +44,10 @@ export interface Tag {
 
 export interface Sheet {
   data: SheetData;
-  /** Null until the image has loaded (or in tests, where nothing is drawn). */
-  img: CanvasImageSource | null;
+  /** The page images (empty in tests, where nothing is drawn). */
+  imgs: CanvasImageSource[];
+  /** Draws a frame itself (the placeholder) instead of copying it from an image. Feet anchor at (0, 0), facing right. */
+  render?: (ctx: CanvasRenderingContext2D, name: string) => void;
   /** Drawn (and its boxes used) for any frame this sheet doesn't have yet. */
   fallback?: Sheet;
 }
@@ -51,7 +55,7 @@ export interface Sheet {
 /** Frame data the fight uses: this sheet's frames, with the fallback's filling any gaps. */
 export function simData(s: Sheet): SheetData {
   if (!s.fallback) return s.data;
-  return { image: s.data.image, frames: { ...simData(s.fallback).frames, ...s.data.frames } };
+  return { images: s.data.images, frames: { ...simData(s.fallback).frames, ...s.data.frames } };
 }
 
 export function tagLength(t: Tag) {
@@ -90,24 +94,33 @@ export function overlap(a: Box, b: Box) {
 export function drawFrame(ctx: CanvasRenderingContext2D, sheet: Sheet, name: string, x: number, y: number, facing: number) {
   const f = sheet.data.frames[name];
   if (!f && sheet.fallback) return drawFrame(ctx, sheet.fallback, name, x, y, facing);
-  if (!f || !sheet.img) return;
+  if (!f) return;
+  const img = sheet.imgs[f.page ?? 0];
+  if (!img && !sheet.render) return;
   ctx.save();
   ctx.translate(Math.round(x), Math.round(y));
   if (facing < 0) ctx.scale(-1, 1);
-  ctx.drawImage(sheet.img, f.x, f.y, f.w, f.h, -f.ax, -f.ay, f.w, f.h);
+  if (sheet.render) sheet.render(ctx, name);
+  else ctx.drawImage(img, f.x, f.y, f.w, f.h, -f.ax, -f.ay, f.w, f.h);
   ctx.restore();
 }
 
-/** Load a sheet from a .json URL (its image path is relative to the .json). Resolves null if missing. */
+/** Load a sheet from a .json URL (page image paths are relative to the .json). Resolves null if missing. */
 export async function loadSheet(url: string): Promise<Sheet | null> {
   try {
     const res = await fetch(url);
     if (!res.ok) return null;
     const data = (await res.json()) as SheetData;
-    const img = new Image();
-    img.src = new URL(data.image, new URL(url, location.href)).href;
-    await img.decode();
-    return { data, img };
+    const base = new URL(url, location.href);
+    const imgs = await Promise.all(
+      data.images.map(async (src) => {
+        const img = new Image();
+        img.src = new URL(src, base).href;
+        await img.decode();
+        return img;
+      }),
+    );
+    return { data, imgs };
   } catch {
     return null;
   }

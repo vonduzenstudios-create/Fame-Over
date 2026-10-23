@@ -16,8 +16,9 @@ const KIND: Record<string, Kind> = {
   launched: 'fly', knockdown: 'down', lie: 'down', getup: 'crouch', ko: 'down', dizzy: 'dizzy', victory: 'win',
 };
 
-const FW = 120, FH = 160, AX = 50, AY = 150;
-const b = (x: number, y: number, w: number, h: number): Box => ({ x, y, w, h });
+/** The mannequin is designed small and drawn at this scale, matching the ~500 px tall art. */
+const K = 4;
+const b = (x: number, y: number, w: number, h: number): Box => ({ x: x * K, y: y * K, w: w * K, h: h * K });
 
 /** Default hurtboxes for a pose type: head, body, legs when standing. */
 export function hurtFor(kind: string): Box[] {
@@ -50,16 +51,11 @@ function poses(tags: Record<string, Tag>): Map<string, PoseFrame> {
   return out;
 }
 
-/** Frame data for every frame the tags name, laid out in a grid. Pure, so tests and the importer can use it. */
+/** Frame data (boxes) for every frame the tags name. Pure, so tests can use it. */
 export function placeholderData(tags: Record<string, Tag>): SheetData {
   const frames: Record<string, Frame> = {};
-  const cols = 16;
-  let i = 0;
-  for (const [name, p] of poses(tags)) {
-    frames[name] = { x: (i % cols) * FW, y: Math.floor(i / cols) * FH, w: FW, h: FH, ax: AX, ay: AY, hurt: hurtFor(p.kind) };
-    i++;
-  }
-  return { image: '', frames };
+  for (const [name, p] of poses(tags)) frames[name] = { x: 0, y: 0, w: 120 * K, h: 160 * K, ax: 50 * K, ay: 150 * K, hurt: hurtFor(p.kind) };
+  return { images: [], frames };
 }
 
 const SKIN = '#e0a878', SHIRT = '#f4f4f0', PANTS = '#202028', HAIR = '#e8c050', LINE = '#101014';
@@ -126,23 +122,17 @@ function drawPose(c: CanvasRenderingContext2D, p: PoseFrame) {
   }
 }
 
-/** The placeholder sheet: its data, plus the drawn image when running in a browser. */
+/** The placeholder sheet: its box data, and a renderer that draws each pose when asked. */
 export function placeholderSheet(tags: Record<string, Tag>): Sheet {
-  const data = placeholderData(tags);
-  if (typeof document === 'undefined') return { data, img: null };
-  const names = Object.keys(data.frames);
-  const cv = document.createElement('canvas');
-  cv.width = 16 * FW;
-  cv.height = Math.ceil(names.length / 16) * FH;
-  const c = cv.getContext('2d')!;
   const ps = poses(tags);
-  for (const n of names) {
-    const f = data.frames[n];
-    c.save();
-    c.beginPath(); c.rect(f.x, f.y, f.w, f.h); c.clip();
-    c.translate(f.x + f.ax, f.y + f.ay);
-    drawPose(c, ps.get(n)!);
-    c.restore();
-  }
-  return { data, img: cv };
+  return {
+    data: placeholderData(tags),
+    imgs: [],
+    render(ctx, name) {
+      const p = ps.get(name);
+      if (!p) return;
+      ctx.scale(K, K);
+      drawPose(ctx, p);
+    },
+  };
 }

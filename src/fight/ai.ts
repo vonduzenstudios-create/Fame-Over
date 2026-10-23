@@ -29,14 +29,14 @@ export class AI {
     const r = this.r.next();
     let out: Partial<RawInput> = {};
     let dur = 6;
-    const threatened = o.state === 'attack' || (o.airborne && dist < 140);
+    const threatened = o.state === 'attack' || (o.airborne && dist < 560);
     if (threatened && r < 0.25 + 0.15 * this.level) {
       out = { bl: true, d: o.move?.level === 'low' };
       dur = 14;
-    } else if (dist > 120) {
+    } else if (dist > 480) {
       out = r < 0.06 ? { u: true, ...fwd } : fwd;
       dur = 10;
-    } else if (dist > 75) {
+    } else if (dist > 300) {
       out = r < 0.2 ? { ...back, lk: true } : r < 0.35 ? { hk: true } : fwd;
       dur = 4;
     } else {

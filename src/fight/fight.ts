@@ -44,8 +44,8 @@ export class Fight {
 
   resetRound() {
     const mid = STAGE_W / 2;
-    this.f[0].x = mid - 70;
-    this.f[1].x = mid + 70;
+    this.f[0].x = mid - 280;
+    this.f[1].x = mid + 280;
     for (const g of this.f) {
       g.hp = MAX_HP;
       g.y = g.vx = g.vy = g.stun = 0;
@@ -101,7 +101,7 @@ export class Fight {
   private applyHit(a: Fighter, d: Fighter, m: Move) {
     a.hits++;
     const away = d.x >= a.x ? 1 : -1;
-    const hx = d.x - away * 10, hy = d.screenY - 80;
+    const hx = d.x - away * 40, hy = d.screenY - 320;
     if (this.canBlock(d, m)) {
       d.crouching = d.input.d;
       d.setState('block', d.crouching ? 'cblock' : 'block');
@@ -117,7 +117,7 @@ export class Fight {
     this.hitstop = heavy ? 9 : 6;
     this.events.push({ t: 'hit', heavy, x: hx, y: hy });
     if (m.effect === 'launch' || m.effect === 'knockdown' || d.airborne || d.hp <= 0) {
-      const [up, back] = m.lift ?? (m.effect === 'knockdown' ? [4, 3] : [6, 2.5]);
+      const [up, back] = m.lift ?? (m.effect === 'knockdown' ? [16, 12] : [24, 10]);
       d.vy = up;
       d.y = Math.max(d.y, 1);
       d.vx = away * back;
@@ -141,13 +141,13 @@ export class Fight {
       a.x -= push * s;
       b.x += push * s;
     }
-    const maxApart = W - 60;
+    const maxApart = W - 240;
     if (Math.abs(b.x - a.x) > maxApart) {
       const mid = (a.x + b.x) / 2, s = b.x >= a.x ? 1 : -1;
       a.x = mid - (s * maxApart) / 2;
       b.x = mid + (s * maxApart) / 2;
     }
-    for (const g of this.f) g.x = Math.max(24, Math.min(STAGE_W - 24, g.x));
+    for (const g of this.f) g.x = Math.max(96, Math.min(STAGE_W - 96, g.x));
   }
 
   private updatePhase() {

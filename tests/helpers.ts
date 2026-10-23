@@ -16,8 +16,8 @@ export function newFight(skipIntro = true) {
 
 /** Put the fighters `gap` pixels apart, facing each other. */
 export function standApart(f: Fight, gap: number) {
-  f.f[0].x = 400;
-  f.f[1].x = 400 + gap;
+  f.f[0].x = 1600;
+  f.f[1].x = 1600 + gap;
   for (const g of f.f) g.faceOpponent();
 }
 

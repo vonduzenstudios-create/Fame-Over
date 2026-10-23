@@ -1,12 +1,11 @@
-// Internal pixel resolution. 16:9, scaled up by a whole number so pixels stay sharp
-// (x4 = 1920x1080). Fighters are drawn about 130 px tall, the same proportions as mid-90s arcade fighters.
-export const W = 480;
-export const H = 270;
+// Native 1920x1080. The picture is scaled to fit the window; fighters stand about 500 px tall.
+export const W = 1920;
+export const H = 1080;
 /** Screen y of the floor the fighters stand on. */
-export const FLOOR = 252;
-export const STAGE_W = 960;
-export const GRAV = 0.55;
+export const FLOOR = 1008;
+export const STAGE_W = 3840;
+export const GRAV = 2.2;
 export const MAX_HP = 1000;
 export const ROUND_TIME = 99;
 /** Closest two fighters' feet can get, in pixels. */
-export const MIN_GAP = 40;
+export const MIN_GAP = 160;

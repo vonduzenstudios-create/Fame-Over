@@ -61,6 +61,6 @@ export const RAMSAY: FighterDef = {
   sheetUrl: 'fighters/ramsay/sheet.json',
   tags: RAMSAY_TAGS,
   moves: STANDARD_MOVES,
-  walk: 2.2,
-  walkBack: 1.8,
+  walk: 8.8,
+  walkBack: 7.2,
 };

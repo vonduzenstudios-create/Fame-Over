@@ -6,11 +6,11 @@ import { App, Scene, TitleScene, viewerFor, FightScene } from './scenes/scenes';
 
 const canvas = document.getElementById('screen') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
-ctx.imageSmoothingEnabled = false;
+ctx.imageSmoothingQuality = 'high';
 
-/** Scale the 480x270 picture up by the biggest whole number that fits (x4 on a 1080p screen). */
+/** Fit the 1920x1080 picture to the window, keeping 16:9. */
 function resize() {
-  const k = Math.max(1, Math.floor(Math.min(window.innerWidth / W, window.innerHeight / H)));
+  const k = Math.min(window.innerWidth / W, window.innerHeight / H);
   canvas.style.width = `${W * k}px`;
   canvas.style.height = `${H * k}px`;
 }

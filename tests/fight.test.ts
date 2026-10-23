@@ -7,7 +7,7 @@ import { newFight, press, run, standApart } from './helpers';
 describe('fight', () => {
   it('a jab up close hits', () => {
     const f = newFight();
-    standApart(f, 50);
+    standApart(f, 200);
     f.step([press({ lp: true }), EMPTY]);
     run(f, 20);
     expect(f.f[1].hp).toBeLessThan(MAX_HP);
@@ -15,7 +15,7 @@ describe('fight', () => {
 
   it('a jab from across the screen whiffs', () => {
     const f = newFight();
-    standApart(f, 200);
+    standApart(f, 800);
     f.step([press({ lp: true }), EMPTY]);
     run(f, 20);
     expect(f.f[1].hp).toBe(MAX_HP);
@@ -23,13 +23,13 @@ describe('fight', () => {
 
   it('holding back blocks a high attack but not a low one', () => {
     const f = newFight();
-    standApart(f, 50);
+    standApart(f, 200);
     const back = press({ r: true }); // P2 faces left, so right is back
     f.step([press({ hp: true }), back]);
     run(f, 20, EMPTY, back);
     expect(f.f[1].hp).toBe(MAX_HP);
     run(f, 30, EMPTY, back);
-    standApart(f, 50);
+    standApart(f, 200);
     f.step([press({ d: true, lk: true }), back]);
     run(f, 20, press({ d: true }), back);
     expect(f.f[1].hp).toBeLessThan(MAX_HP);
@@ -37,7 +37,7 @@ describe('fight', () => {
 
   it('an uppercut launches, the opponent lands, lies down and gets back up', () => {
     const f = newFight();
-    standApart(f, 50);
+    standApart(f, 200);
     f.step([press({ d: true, hp: true }), EMPTY]);
     const seen = new Set<string>();
     for (let i = 0; i < 200; i++) {
@@ -51,7 +51,7 @@ describe('fight', () => {
   it('a knockout ends the round and two round wins end the match', () => {
     const f = newFight();
     f.f[1].hp = 1;
-    standApart(f, 50);
+    standApart(f, 200);
     f.step([press({ lp: true }), EMPTY]);
     run(f, 20);
     expect(f.phase).toBe('ko');

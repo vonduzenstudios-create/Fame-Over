@@ -10,6 +10,16 @@ import { drawText } from '../gfx/font';
 import { drawFrame, Sheet, simData, tagLength, frameNameAt, worldBox } from '../sprites/sheet';
 import { drawKitchen } from '../stages/kitchen';
 
+/** Menus and the HUD are laid out in a quarter-size space (480x270) and drawn scaled up 4x. */
+const UW = 480, UH = 270;
+function ui(ctx: CanvasRenderingContext2D, f: () => void) {
+  ctx.save();
+  ctx.scale(W / UW, H / UH);
+  ctx.imageSmoothingEnabled = false;
+  f();
+  ctx.restore();
+}
+
 export interface Scene {
   update(): void;
   draw(ctx: CanvasRenderingContext2D): void;
@@ -44,9 +54,14 @@ export class TitleScene implements Scene {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    drawKitchen(ctx, 240 + Math.sin(this.t / 200) * 200, this.t);
+    drawKitchen(ctx, 960 + Math.sin(this.t / 200) * 800, this.t);
     ctx.fillStyle = 'rgba(0,0,0,0.55)';
     ctx.fillRect(0, 0, W, H);
+    ui(ctx, () => this.drawMenu(ctx));
+  }
+
+  private drawMenu(ctx: CanvasRenderingContext2D) {
+    const W = UW;
     drawText(ctx, 'FAME OVER', W / 2, 60, '#fff', { scale: 6, align: 'center', grad: ['#ffe070', '#e03010'], outline: '#200', shadow: '#000' });
     this.items.forEach((s, i) => {
       const on = i === this.sel;
@@ -144,9 +159,9 @@ export class FightScene implements Scene {
     // shadows, then fighters (the attacker drawn in front)
     for (const g of f.f) {
       ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      const w = Math.max(16, 44 - g.y * 0.2);
+      const w = Math.max(64, 176 - g.y * 0.2);
       ctx.beginPath();
-      ctx.ellipse(g.x - cam, FLOOR + 1, w / 2, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(g.x - cam, FLOOR + 4, w / 2, 16, 0, 0, Math.PI * 2);
       ctx.fill();
     }
     const order = f.f[0].state === 'attack' ? [1, 0] : [0, 1];
@@ -157,28 +172,33 @@ export class FightScene implements Scene {
     }
     for (const s of this.sparks) {
       ctx.fillStyle = s.block ? '#9cf' : s.heavy ? '#fff2a0' : '#fff';
-      const r = (s.heavy ? 14 : 9) * (1 - s.t / 12);
-      ctx.fillRect(s.x - cam - r, s.y - 1, r * 2, 3);
-      ctx.fillRect(s.x - cam - 1, s.y - r, 3, r * 2);
+      const r = (s.heavy ? 56 : 36) * (1 - s.t / 12);
+      ctx.fillRect(s.x - cam - r, s.y - 6, r * 2, 12);
+      ctx.fillRect(s.x - cam - 6, s.y - r, 12, r * 2);
     }
     ctx.restore();
     this.drawHud(ctx);
   }
 
   private drawBoxes(ctx: CanvasRenderingContext2D, g: Fighter, cam: number) {
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 4;
     ctx.strokeStyle = '#4af';
-    for (const b of g.hurtboxes()) ctx.strokeRect(b.x - cam + 0.5, b.y + 0.5, b.w - 1, b.h - 1);
+    for (const b of g.hurtboxes()) ctx.strokeRect(b.x - cam + 2, b.y + 2, b.w - 4, b.h - 4);
     const hb = g.hitbox();
     if (hb) {
       ctx.strokeStyle = '#f33';
-      ctx.strokeRect(hb.x - cam + 0.5, hb.y + 0.5, hb.w - 1, hb.h - 1);
+      ctx.strokeRect(hb.x - cam + 2, hb.y + 2, hb.w - 4, hb.h - 4);
     }
     ctx.fillStyle = '#ff0';
-    ctx.fillRect(g.x - cam - 1, g.screenY - 1, 3, 3);
+    ctx.fillRect(g.x - cam - 6, g.screenY - 6, 12, 12);
   }
 
   private drawHud(ctx: CanvasRenderingContext2D) {
+    ui(ctx, () => this.drawHudSmall(ctx));
+  }
+
+  private drawHudSmall(ctx: CanvasRenderingContext2D) {
+    const W = UW;
     const f = this.fight;
     const BW = 190;
     f.f.forEach((g, i) => {
@@ -247,22 +267,25 @@ export class ViewerScene implements Scene {
     drawFrame(ctx, this.sheet, fr, x, FLOOR, 1);
     const f = simData(this.sheet).frames[fr];
     if (f) {
+      ctx.lineWidth = 4;
       ctx.strokeStyle = '#4af';
       for (const b of f.hurt) {
         const w = worldBox(b, x, FLOOR, 1);
-        ctx.strokeRect(w.x + 0.5, w.y + 0.5, w.w - 1, w.h - 1);
+        ctx.strokeRect(w.x + 2, w.y + 2, w.w - 4, w.h - 4);
       }
       const m = Object.values(this.def.moves).find((m) => m.tag === name);
       const active = m && tick >= m.active[0] && tick < m.active[1];
       if (m && active) {
         const w = worldBox(f.hit ?? m.box, x, FLOOR, 1);
         ctx.strokeStyle = '#f33';
-        ctx.strokeRect(w.x + 0.5, w.y + 0.5, w.w - 1, w.h - 1);
+        ctx.strokeRect(w.x + 2, w.y + 2, w.w - 4, w.h - 4);
       }
     }
-    drawText(ctx, `${this.def.name}  ${name}  (${this.i + 1}/${this.names.length})`, 8, 8, '#fff');
-    drawText(ctx, `TICK ${Math.min(tick, len)}/${len}  FRAME ${fr}  ${this.paused ? 'PAUSED' : `SPEED ${this.speed}`}`, 8, 20, '#ccc');
-    drawText(ctx, 'LEFT/RIGHT ANIM  UP/DOWN SPEED  LP PAUSE  HP STEP', 8, H - 12, '#aaa');
+    ui(ctx, () => {
+      drawText(ctx, `${this.def.name}  ${name}  (${this.i + 1}/${this.names.length})`, 8, 8, '#fff');
+      drawText(ctx, `TICK ${Math.min(tick, len)}/${len}  FRAME ${fr}  ${this.paused ? 'PAUSED' : `SPEED ${this.speed}`}`, 8, 20, '#ccc');
+      drawText(ctx, 'LEFT/RIGHT ANIM  UP/DOWN SPEED  LP PAUSE  HP STEP', 8, UH - 12, '#aaa');
+    });
   }
 }
 
