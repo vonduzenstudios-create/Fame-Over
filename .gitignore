@@ -1,0 +1,7 @@
+node_modules
+dist
+*.log
+.DS_Store
+# Local-only art (placeholder sheets that must never be committed). See README "Local art".
+public/local-art/
+art-local/
