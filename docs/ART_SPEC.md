@@ -6,7 +6,9 @@ technical delivery only. It is not a pose, motion or timing reference from any o
 describe how the character looks: pair it with that character's approved design reference and written
 character brief.
 
-v2 (2026-10-23): native 1080p and full colour, plus answers to the review of v1.
+v2 (2026-10-23): native 1080p and full colour, plus answers to the review of v1. Each character also gets
+its own brief (look, personality, signature prop and where it's stowed, which attacks use it, specials),
+written before any art is made.
 
 ## 1. Resolution and scale
 
@@ -38,7 +40,10 @@ v2 (2026-10-23): native 1080p and full colour, plus answers to the review of v1.
 ## 3. Colour and edges
 
 - **Full colour, no palette limit.** Keep the photographic shading of the approved pilot.
-- One consistent light direction for the whole character (choose one and record it in the brief).
+- **Lighting, the same for every character so they match on one stage:** key light from the front-left
+  and above (from screen left, about 45 degrees up, slightly toward the camera), a soft cool fill from the
+  right, no hard rim light. The engine mirrors characters on the right side, which flips their light;
+  that is expected.
 - Edges may be soft (anti-aliased alpha). **No coloured halo or fringe:** the edge pixels must carry the
   character's own colours, not the generator's background (check dark trousers and shoes especially).
 - Colour should not drift between frames or animations (skin, jacket white, scarf red, wood of props).
@@ -49,12 +54,23 @@ v2 (2026-10-23): native 1080p and full colour, plus answers to the review of v1.
 ## 4. Animations
 
 One folder per animation, named with the engine's id: `frames/<id>/01.png`, `02.png`, ... in play order.
-Frame counts are guides for 60 fps play; fewer clean, consistent frames beat many inconsistent ones.
+
+**Speed vs smoothness.** The game must play at the speed of a mid-90s arcade fighter. The engine owns
+the speed: it sets how long each move lasts, and the art fills that time. The frame counts below are
+already a little above that era's (roughly 1.25x) for smoother motion; going higher doesn't make a move
+slower, it only adds in-betweens. Never stretch an attack's wind-up to show more frames: put the extra
+frames into follow-through and recovery instead. Fewer clean, consistent frames beat many inconsistent ones.
 The engine decides when an attack can hit, so attack frame counts are art only: mark the impact frame.
+
+**Fighting style and props.** Every character fights with punches and kicks: all the standard attacks
+below are unarmed. A signature prop (for example a chef's rolling pin) is used only in the specific
+attacks the character brief names, the way a baton fighter pulls it for a few moves. The rest of the
+time it stays stowed in one fixed place on the body (belt, holster or back), the same on every frame.
+The character brief says where it's stowed and which attacks use it.
 
 | id | What | Frames | Notes |
 | --- | --- | --- | --- |
-| idle | fighting stance | 8-10 | seamless loop (the approved pilot) |
+| idle | fighting stance, fists up | 8-10 | seamless loop |
 | turn | turning to face the other way | 2-3 | see Facing |
 | walk | walking forward | 8-10 | seamless loop; walking back plays it reversed |
 | crouch | ducking down | 3 | last frame is the crouch hold |
