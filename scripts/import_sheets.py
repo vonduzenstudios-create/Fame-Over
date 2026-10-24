@@ -3,7 +3,7 @@
 
 Input: an art folder laid out as frames/<animation>/<nn>.png (e.g. frames/lp/02.png), one
 transparent PNG per frame, the fighter facing right (docs/ART_SPEC.md). Output: sheet pages
-(sheet-0.png, sheet-1.png, ... up to 4096x4096 each) + sheet.json in --out, with every frame keyed
+(sheet-0.webp, sheet-1.webp, ... up to 4096x4096 each) + sheet.json in --out, with every frame keyed
 "<animation>/<nn>" (the names the fighter's tags use, see src/fighters/<id>/fighter.ts).
 
 For each frame the script works out a starting point you then check in the sprite viewer
@@ -89,6 +89,7 @@ def main():
     ap.add_argument('art', help='art folder containing frames/<section>/<name>.png')
     ap.add_argument('--out', required=True, help='where to write sheet.png and sheet.json')
     ap.add_argument('--scale', type=float, default=1.0, help='resize frames first (nearest neighbour)')
+    ap.add_argument('--format', choices=('webp', 'png'), default='webp', help='sheet page format (webp is ~5x smaller)')
     ap.add_argument('--pivot', default=None, help='feet anchor "x,y" on every frame (default: 384,736 for 768x768 frames, else guessed)')
     a = ap.parse_args()
 
@@ -159,9 +160,15 @@ def main():
     out = pathlib.Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     images = []
+    for old in list(out.glob('sheet-*.png')) + list(out.glob('sheet-*.webp')):
+        old.unlink()
     for i, sh in enumerate(sheets):
-        sh.save(out / f'sheet-{i}.png', optimize=True)
-        images.append(f'sheet-{i}.png')
+        name = f'sheet-{i}.{a.format}'
+        if a.format == 'webp':
+            sh.save(out / name, quality=90, alpha_quality=100, method=6)
+        else:
+            sh.save(out / name, optimize=True)
+        images.append(name)
     (out / 'sheet.json').write_text(json.dumps({'images': images, 'frames': frames}, indent=1, sort_keys=True))
     print(f'{len(frames)} frames -> {len(images)} page(s) in {out} and sheet.json')
 

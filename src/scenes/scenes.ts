@@ -49,7 +49,7 @@ export class TitleScene implements Scene {
     }
     if (p.start || p.lp) {
       sfx.gong();
-      startFight(this.app, FIGHTERS[0], FIGHTERS[0], this.sel === 0);
+      this.app.go(new SelectScene(this.app, this.sel === 0));
     }
   }
 
@@ -68,6 +68,83 @@ export class TitleScene implements Scene {
       drawText(ctx, (on ? '> ' : '  ') + s, W / 2, 160 + i * 18, on ? '#ffe070' : '#aaa', { scale: 2, align: 'center', shadow: '#000' });
     });
     drawText(ctx, 'ENTER OR START', W / 2, 240, '#888', { align: 'center' });
+  }
+}
+
+// ---------------------------------------------------------------- character select
+
+/**
+ * Each player moves a cursor over the roster with left/right and picks with a punch. Against the CPU,
+ * the CPU takes the next fighter along once player 1 has picked. Back returns to the title.
+ */
+export class SelectScene implements Scene {
+  private e = [new Edge(), new Edge()];
+  private cur: [number, number] = [0, Math.min(1, FIGHTERS.length - 1)];
+  private done: [boolean, boolean] = [false, false];
+  private sheets: Sheet[] | null = null;
+  private t = 0;
+  private wait = -1;
+  constructor(private app: App, private vsCpu: boolean) {
+    Promise.all(FIGHTERS.map(sheetFor)).then((s) => (this.sheets = s));
+  }
+
+  update() {
+    this.t++;
+    if (!this.sheets) return;
+    if (this.wait >= 0) {
+      if (this.wait-- === 0) startFight(this.app, FIGHTERS[this.cur[0]], FIGHTERS[this.cur[1]], this.vsCpu);
+      return;
+    }
+    const n = FIGHTERS.length;
+    for (const side of [0, 1] as const) {
+      if (side === 1 && this.vsCpu) continue;
+      const p = this.e[side].update(readPlayer(side, this.vsCpu));
+      if (p.back) return this.app.go(new TitleScene(this.app));
+      if (this.done[side]) continue;
+      if (p.l || p.r) {
+        this.cur[side] = (this.cur[side] + (p.r ? 1 : n - 1)) % n;
+        sfx.select();
+      }
+      if (p.lp || p.hp || p.start) {
+        this.done[side] = true;
+        sfx.gong();
+        if (this.vsCpu) {
+          this.cur[1] = (this.cur[0] + 1) % n;
+          this.done[1] = true;
+        }
+      }
+    }
+    if (this.done[0] && this.done[1]) this.wait = 40;
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    drawKitchen(ctx, 960, this.t);
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(0, 0, W, H);
+    const n = FIGHTERS.length;
+    const gap = 560;
+    const x0 = W / 2 - ((n - 1) * gap) / 2;
+    FIGHTERS.forEach((def, i) => {
+      const x = x0 + i * gap;
+      const on = this.cur.map((c, s) => c === i && (s === 0 || !this.vsCpu || this.done[0]));
+      if (on[0] || on[1]) {
+        ctx.fillStyle = on[0] && on[1] ? 'rgba(255,224,112,0.18)' : on[0] ? 'rgba(255,80,60,0.2)' : 'rgba(80,140,255,0.2)';
+        ctx.fillRect(x - 240, 300, 480, 680);
+      }
+      if (this.sheets) drawFrame(ctx, this.sheets[i], 'idle/01', x, 900, i % 2 === 0 ? 1 : -1);
+    });
+    ui(ctx, () => {
+      drawText(ctx, 'CHOOSE YOUR FIGHTER', UW / 2, 20, '#fff', { scale: 3, align: 'center', grad: ['#ffe070', '#e03010'], outline: '#200' });
+      FIGHTERS.forEach((def, i) => {
+        const x = (x0 + i * gap) / 4;
+        drawText(ctx, def.name.toUpperCase(), x, 236, '#fff', { scale: 2, align: 'center', shadow: '#000' });
+        const tags: string[] = [];
+        if (this.cur[0] === i) tags.push(this.done[0] ? '1P OK' : '1P');
+        if (this.cur[1] === i && (!this.vsCpu || this.done[0])) tags.push(this.vsCpu ? 'CPU' : this.done[1] ? '2P OK' : '2P');
+        drawText(ctx, tags.join('  '), x, 64, '#ffe070', { scale: 2, align: 'center', shadow: '#000' });
+      });
+      if (!this.sheets) drawText(ctx, 'LOADING', UW / 2, 130, '#fff', { scale: 2, align: 'center' });
+    });
   }
 }
 

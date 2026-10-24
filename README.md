@@ -42,7 +42,7 @@ Holding back also blocks. Lights chain into lights when they connect.
 - `src/sprites/`: sprite sheets (`sheet.ts`) and the placeholder mannequin (`placeholder.ts`) drawn for
   any frame that has no art yet.
 - `src/fighters/<id>/fighter.ts`: a fighter's animations (which frames, how long each is held) and moves.
-  Art lives in `public/fighters/<id>/` (`sheet.json` plus `sheet-0.png`, `sheet-1.png`, ...).
+  Art lives in `public/fighters/<id>/` (`sheet.json` plus `sheet-0.webp`, `sheet-1.webp`, ...).
 - `src/net/` and `server/`: the lockstep netcode and matchmaking server carried over from Pixel Fighter,
   not wired into a menu yet.
 
