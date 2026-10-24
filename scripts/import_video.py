@@ -50,6 +50,38 @@ def key_out(rgb, key, lo, hi):
     return out, a
 
 
+def largest_blob(a, step=4):
+    """Keep only the biggest connected shape (drops watermarks, logos and stray specks)."""
+    h, w = a.shape
+    small = a[:h - h % step, :w - w % step].reshape(h // step, step, w // step, step).max((1, 3)) > 0.5
+    lab = np.zeros(small.shape, np.int32)
+    sizes = {}
+    n = 0
+    for y0, x0 in zip(*np.nonzero(small)):
+        if lab[y0, x0]:
+            continue
+        n += 1
+        stack, count = [(y0, x0)], 0
+        lab[y0, x0] = n
+        while stack:
+            y, x = stack.pop()
+            count += 1
+            for yy, xx in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1), (y + 1, x + 1), (y - 1, x - 1), (y + 1, x - 1), (y - 1, x + 1)):
+                if 0 <= yy < small.shape[0] and 0 <= xx < small.shape[1] and small[yy, xx] and not lab[yy, xx]:
+                    lab[yy, xx] = n
+                    stack.append((yy, xx))
+        sizes[n] = count
+    if not sizes:
+        return a
+    keep = lab == max(sizes, key=sizes.get)
+    # grow by one cell so soft edges survive, then scale back up
+    g = keep.copy()
+    g[1:] |= keep[:-1]; g[:-1] |= keep[1:]; g[:, 1:] |= keep[:, :-1]; g[:, :-1] |= keep[:, 1:]
+    big = np.zeros_like(a, bool)
+    big[:h - h % step, :w - w % step] = np.repeat(np.repeat(g, step, 0), step, 1)
+    return np.where(big, a, 0)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('video')
@@ -61,6 +93,7 @@ def main():
     ap.add_argument('--loop', action='store_true', help='looping move: the clip end is the start again, so it is left out')
     ap.add_argument('--key', default='#00ff00', help='background colour (default pure green)')
     ap.add_argument('--tolerance', default='60,140', help='colour distance "solid,clear" for the key edge')
+    ap.add_argument('--keep-all', action='store_true', help='keep every shape, not just the body (for FX clips)')
     ap.add_argument('--rescale', action='store_true', help='measure the scale from this clip even if scale.json exists')
     a = ap.parse_args()
 
@@ -82,7 +115,8 @@ def main():
         keyed = []
         for f in picks:
             rgb = np.asarray(Image.open(f).convert('RGB'), np.float32)
-            keyed.append(key_out(rgb, key, lo, hi))
+            rgb, al = key_out(rgb, key, lo, hi)
+            keyed.append((rgb, al if a.keep_all else largest_blob(al)))
 
     # placement from the first frame: figure height -> scale, feet -> pivot
     _, a0 = keyed[0]
