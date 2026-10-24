@@ -8,10 +8,14 @@ Run a cleanup pass on the animation in `frames/<animation>/`. Small face differe
 acceptable. Your job is to remove the obvious faults that make the motion jerky. Keep the art, the
 character and the scale exactly as they are. **Never resize individual frames.**
 
-**The design is locked.** Never change the face, hair, build, outfit or colours, and never bring in a
-face, head or detail from another version or reference image. The only reference for "correct" is the
-current version's own frame 01. If a fix would mean redesigning the character, skip it and list it in
-the report instead. Work on copies and save
+**Don't change the design** (face, hair, build, outfit, colours) unless I ask for it in the same message.
+
+**Keep the motion alive.** Pinning the feet must not freeze the body: the head, shoulders and chest
+still rise and fall as before. A cleaned animation should move as much as the original, just more evenly.
+
+**Never cut and paste parts between frames** (an arm from one frame onto another, a patched pin). It
+leaves ghost edges and makes limbs jump. Fix a bad frame by regenerating the whole frame from its
+neighbours. Work on copies and save
 the result as the next version (for example v05), so I can compare it with the original.
 
 ## 1. Measure every frame first
