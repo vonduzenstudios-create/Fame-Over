@@ -1,9 +1,10 @@
 import type { FighterDef } from '../fight/types';
 import { loadSheet, Sheet } from '../sprites/sheet';
 import { placeholderSheet } from '../sprites/placeholder';
+import { CHEF } from './chef/fighter';
 import { RAMSAY } from './ramsay/fighter';
 
-export const FIGHTERS: FighterDef[] = [RAMSAY];
+export const FIGHTERS: FighterDef[] = [CHEF, RAMSAY];
 
 const sheets = new Map<string, Sheet>();
 
