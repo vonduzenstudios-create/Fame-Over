@@ -56,7 +56,7 @@ pip install pillow
 python3 scripts/import_sheets.py "C:/Games/Fame Over/Graphics/Characters/<Character>" --out public/fighters/<id>
 ```
 
-That packs the frames into sheet pages and suggests hurt and hit boxes. Check them in `?viewer`, and put
+Animations made as videos go through `scripts/import_video.py` first (see docs/HANDOFF.md). That packs the frames into sheet pages and suggests hurt and hit boxes. Check them in `?viewer`, and put
 corrections in the art folder's `overrides.json` (format at the top of the script). Missing frames keep
 showing the placeholder.
 

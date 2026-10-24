@@ -32,3 +32,17 @@ re-export it: `scale = 500 / (source idle height in px)`, one factor for every f
 At Stage 2 (idle pilot), send me the `idle` folder. I'll import it and check it in the game the same
 day, so we catch size or pivot problems before the full set. After that the agent makes the full set,
 and the delivered folder goes into the repo's importer unchanged.
+
+## Animating: use image-to-video, not one image per frame (2026-10-24)
+
+Generating each frame as its own image repaints the character every time, so it flickers and jerks.
+Video models (Kling, Seedance, Wan, Grok Imagine Video) make all the frames of a move together from the
+approved character image, so the character stays consistent. For every animation:
+
+1. Start from the approved master image of the character (the same one every time).
+2. Prompt one move per clip: "side view, facing right, [the move from the pose board], stays in place,
+   locked camera, full body in frame, flat solid pure green (#00ff00) background, no shadows".
+   Idle, walk and dizzy: "seamless loop".
+3. Send me the clip, or run it yourself:
+   `python3 scripts/import_video.py clip.mp4 --art <character folder> --anim lp --frames 6`
+   It picks the frames, removes the green, sets the size and the feet, and keeps one scale for every clip.
