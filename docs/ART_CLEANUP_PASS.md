@@ -6,7 +6,12 @@ Run this on one finished animation at a time. Example: "Run the cleanup pass on 
 
 Run a cleanup pass on the animation in `frames/<animation>/`. Small face differences between frames are
 acceptable. Your job is to remove the obvious faults that make the motion jerky. Keep the art, the
-character and the scale exactly as they are. **Never resize individual frames.** Work on copies and save
+character and the scale exactly as they are. **Never resize individual frames.**
+
+**The design is locked.** Never change the face, hair, build, outfit or colours, and never bring in a
+face, head or detail from another version or reference image. The only reference for "correct" is the
+current version's own frame 01. If a fix would mean redesigning the character, skip it and list it in
+the report instead. Work on copies and save
 the result as the next version (for example v05), so I can compare it with the original.
 
 ## 1. Measure every frame first
